@@ -22,75 +22,57 @@ void playStraight(int, int*, int*);
 void playFullHouse(int, int*, int*);
 void playChance(int, int*, int*);
 void playYatzy(int, int*, int*);
+void printScore(int*);
 
 int main(void) {
-    int *diesPtr;
-    int dies;
-    int *score;
+    int *diesPtr, *score, dies, programActive = 1;
 
     /* Seeding the rand function */
     srand(time(0));
 
-    /* Acquiring the number of dies */
-    printf("The number of dies: ");
-    scanf("%d", &dies);
+    while (programActive == 1) {
+        /* Acquiring the number of dies */
+        printf("The number of dies: ");
+        scanf("%d", &dies);
 
+        /* Allocating memory to the array of doubles */
+        diesPtr = (int*) malloc(dies * sizeof(int));
+        score = (int*) malloc(16 * sizeof(int));
 
-    /* Allocating memory to the array of doubles */
-    diesPtr = (int*) malloc(dies * sizeof(int));
-    score = (int*) malloc(16 * sizeof(int));
-
-    if (diesPtr == NULL) {
-        printf("Memory not allocated.\n");
-        exit(0);
-    }
-    else {
-        playUpper(dies, diesPtr, score);
-        playOnePair(dies, diesPtr, score);
-        playTwoPairs(dies, diesPtr, score);
-        playOfAKind(dies, diesPtr, score);
-        playStraight(dies, diesPtr, score);
-        playFullHouse(dies, diesPtr, score);
-        playChance(dies, diesPtr, score);
-        playYatzy(dies, diesPtr, score);
-
-        /* Calculate the total score */
-        int totalScore = 0;
-        for (int i = 0; i < 16; i++) {
-            totalScore += score[i];
+        if (diesPtr == NULL) {
+            printf("Memory not allocated.\n");
+            exit(0);
         }
+        else {
+            playUpper(dies, diesPtr, score);
+            playOnePair(dies, diesPtr, score);
+            playTwoPairs(dies, diesPtr, score);
+            playOfAKind(dies, diesPtr, score);
+            playStraight(dies, diesPtr, score);
+            playFullHouse(dies, diesPtr, score);
+            playChance(dies, diesPtr, score);
+            playYatzy(dies, diesPtr, score);
 
-        /* Printing the results in a table */ 
-        printf("\n");
-        printf("*-------Yatzy--Results-------*\n");
-        printf("*                            *\n");
-        printf("*-------Upper--Section-------*\n");
-        printf("-  Ones:             %d\n", score[0]);
-        printf("-  Twos:             %d\n", score[1]);
-        printf("-  Threes:           %d\n", score[2]);
-        printf("-  Fours:            %d\n", score[3]);
-        printf("-  Fives:            %d\n", score[4]);
-        printf("-  Sixes:            %d\n", score[5]);
-        printf("*--------Upper--Total--------*\n");
-        printf("-  Total:            %d\n", score[0] + score[1] + score[2] + score[3] + score[4] + score[5]);
-        printf("*-------Lower--Section-------*\n");
-        printf("-  Bonus:            %d\n", score[6]);
-        printf("-  One Pair:         %d\n", score[7]);
-        printf("-  Two pairs:        %d\n", score[8]);
-        printf("-  Three of a kind:  %d\n", score[9]);
-        printf("-  Four of a kind:   %d\n", score[10]);
-        printf("-  Small straight:   %d\n", score[11]);
-        printf("-  Large straight:   %d\n", score[12]);
-        printf("-  Full house:       %d\n", score[13]);
-        printf("-  Chance:           %d\n", score[14]);
-        printf("-  Yatzy:            %d\n", score[15]);
-        printf("*--------Total--Score--------*\n");
-        printf("-  Total:            %d\n", totalScore);
+            /* Printing the score */
+            printScore(score);
 
-        // Deallocating the array
-        free(diesPtr);
-        free(score);
+            /* Deallocating the memory for the array */
+            free(diesPtr);
+            free(score);
+
+            char tempContinue;
+
+            printf("\nWould you like to continue? (y/n)\n");
+            scanf(" %c", &tempContinue);
+
+            if (tempContinue != 'y') {
+                programActive = 0;
+            }
+
+        }
     }
+
+    return EXIT_SUCCESS;
 }
 
 void rollMultipleDies(int rollTimes, int *arrayPointer) {
@@ -370,4 +352,38 @@ void playYatzy(int dies, int *diesPtr, int *scoreArray) {
     else {
         printf("Sadly, you didnt get yatzy.\n");
     }
+}
+
+void printScore(int *scoreArray){
+    /* Calculate the total score */
+    int totalScore = 0;
+    for (int i = 0; i < 16; i++) {
+        totalScore += scoreArray[i];
+    }
+    /* Printing the results in a table */ 
+    printf("\n");
+    printf("*-------Yatzy--Results-------*\n");
+    printf("*                            *\n");
+    printf("*-------Upper--Section-------*\n");
+    printf("-  Ones:             %d\n", scoreArray[0]);
+    printf("-  Twos:             %d\n", scoreArray[1]);
+    printf("-  Threes:           %d\n", scoreArray[2]);
+    printf("-  Fours:            %d\n", scoreArray[3]);
+    printf("-  Fives:            %d\n", scoreArray[4]);
+    printf("-  Sixes:            %d\n", scoreArray[5]);
+    printf("*--------Upper--Total--------*\n");
+    printf("-  Total:            %d\n", scoreArray[0] + scoreArray[1] + scoreArray[2] + scoreArray[3] + scoreArray[4] + scoreArray[5]);
+    printf("*-------Lower--Section-------*\n");
+    printf("-  Bonus:            %d\n", scoreArray[6]);
+    printf("-  One Pair:         %d\n", scoreArray[7]);
+    printf("-  Two pairs:        %d\n", scoreArray[8]);
+    printf("-  Three of a kind:  %d\n", scoreArray[9]);
+    printf("-  Four of a kind:   %d\n", scoreArray[10]);
+    printf("-  Small straight:   %d\n", scoreArray[11]);
+    printf("-  Large straight:   %d\n", scoreArray[12]);
+    printf("-  Full house:       %d\n", scoreArray[13]);
+    printf("-  Chance:           %d\n", scoreArray[14]);
+    printf("-  Yatzy:            %d\n", scoreArray[15]);
+    printf("*--------Total--Score--------*\n");
+    printf("-  Total:            %d\n", totalScore);
 }
