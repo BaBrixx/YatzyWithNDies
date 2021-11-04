@@ -10,14 +10,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-/* Shoud be implemented?
+#define DIE_MAX_EYES 6
+
+/* Using an enumerator to keep track of the scores in the score array */
 enum round {ones, twos, threes, fours, fives, sixes, bonus,
             onePair, twoPairs, threeKind, fourKind, smallStraight, 
             largeStraight, fullHouse, chance, yatzy};
-*/
 
-#define DIE_MAX_EYES 6
-
+void playYatzyGame();
 void rollMultipleDies(int, int*);
 void dicePrEye(int, int*, int*);
 void playUpper(int, int*, int*);
@@ -31,56 +31,72 @@ void playYatzy(int, int*, int*);
 void printScore(int*);
 
 int main(void) {
-    int *dicePtr, *score, dice, programActive = 1;
+    int programActive = 1;
 
     /* Seeding the rand function */
     srand(time(0));
 
+    /* While loop to keep the program running until the user decides to stop */
     while (programActive == 1) {
-        /* Acquiring the number of dice */
-        printf("The number of dice: ");
-        scanf("%d", &dice);
+        char tempContinue;
 
-        /* Allocating memory to the array of doubles */
-        dicePtr = (int*) malloc(dice * sizeof(int));
-        score = (int*) malloc(16 * sizeof(int));
+        playYatzyGame();
 
-        if (dicePtr == NULL) {
-            printf("Memory not allocated.\n");
-            exit(0);
-        }
-        else {
-            playUpper(dice, dicePtr, score);
-            playOnePair(dice, dicePtr, score);
-            playTwoPairs(dice, dicePtr, score);
-            playOfAKind(dice, dicePtr, score);
-            playStraight(dice, dicePtr, score);
-            playFullHouse(dice, dicePtr, score);
-            playChance(dice, dicePtr, score);
-            playYatzy(dice, dicePtr, score);
-
-            /* Printing the score */
-            printScore(score);
-
-            /* Deallocating the memory for the array */
-            free(dicePtr);
-            free(score);
-
-            char tempContinue;
-
-            printf("\nWould you like to continue? (y/n)\n");
-            scanf(" %c", &tempContinue);
-
-            if (tempContinue != 'y') {
-                programActive = 0;
-            }
-
+        /* Prompting the user if it wants to continue or not */
+        printf("\nWould you like to continue? (y/n)\n");
+        scanf(" %c", &tempContinue);
+        if (tempContinue != 'y') {
+            programActive = 0;
         }
     }
-
     return EXIT_SUCCESS;
 }
 
+/* Function to play a game of Yatzy */
+void playYatzyGame() {
+    int *dicePtr, *score, dice, corrDiceInput = 0;
+
+    // Continues until a valid input 
+    do {
+        /* Acquiring the number of dice */
+        printf("The number of dice: ");
+        int inputs = scanf("%d", &dice);
+
+        // Making sure that the user didnt input a newline (\n)
+        char c;
+        while ((c = getchar()) != '\n' && c != EOF) { }
+        
+        corrDiceInput = (inputs == 1 && (dice >= 5));
+    } while (!corrDiceInput);
+
+    /* Allocating memory to the array of doubles */
+    dicePtr = (int*) malloc(dice * sizeof(int));
+    score = (int*) malloc(16 * sizeof(int));
+
+    if (dicePtr == NULL) {
+        printf("Memory not allocated.\n");
+        exit(0);
+    }
+    else {
+        playUpper(dice, dicePtr, score);
+        playOnePair(dice, dicePtr, score);
+        playTwoPairs(dice, dicePtr, score);
+        playOfAKind(dice, dicePtr, score);
+        playStraight(dice, dicePtr, score);
+        playFullHouse(dice, dicePtr, score);
+        playChance(dice, dicePtr, score);
+        playYatzy(dice, dicePtr, score);
+
+        /* Printing the score */
+        printScore(score);
+
+        /* Deallocating the memory for the array */
+        free(dicePtr);
+        free(score);
+    }
+}
+
+/* Function to roll and randomize the dice in a given array */
 void rollMultipleDies(int rollTimes, int *arrayPointer) {
     for (int i = 0; i < rollTimes; i++) {
         arrayPointer[i] = (rand() % DIE_MAX_EYES) + 1;
@@ -105,9 +121,11 @@ void dicePrEye(int dice, int *dicePtr, int *eyesArray){
 void playUpper(int dice, int *dicePtr, int *scoreArray) {
     int schFor, upperTotal = 0;
 
+    /* For loop for playing the upper section for the individual dice */
     for (schFor = 1; schFor <= 6; schFor++) {
         rollMultipleDies(dice, dicePtr);
 
+        /* Counting the number of the specific die */
         int currDice = 0;
         int diceFound = 0;
         while ((currDice) < dice && diceFound < 5) {
@@ -117,6 +135,7 @@ void playUpper(int dice, int *dicePtr, int *scoreArray) {
             currDice++;
         }
 
+        /* Printing the results for each round */
         printf("Your got %d dice with %d eyes and the rolled dice were: ", diceFound, schFor);
         for (int i = 0; i < dice; i++) {
             printf("%d, ",dicePtr[i]);
@@ -128,13 +147,14 @@ void playUpper(int dice, int *dicePtr, int *scoreArray) {
         upperTotal += diceFound * schFor;
     }
     
+    /* Checking if the user is eligeble for the bonus */
     if (upperTotal >= 63) {
         scoreArray[6] = 50;
-        printf("You got %d and therefore got an extra %d points!\n", upperTotal, scoreArray[6]);
+        printf("You got %d and therefore got an extra %d points!\n", upperTotal, scoreArray[bonus]);
     }
     else {
         scoreArray[6] = 0;
-        printf("You got %d and therefore got %d extra points!\n", upperTotal, scoreArray[6]);
+        printf("You got %d and therefore got %d extra points!\n", upperTotal, scoreArray[bonus]);
     }
 }
 
@@ -147,19 +167,20 @@ void playOnePair(int dice, int *dicePtr, int *scoreArray) {
     dicePrEye(dice, dicePtr, diceWithNEyes);
 
     /* Could have used a while loop but this is easier to read and takes almost the same amount of lines */
-    if (diceWithNEyes[5] >= 2) scoreArray[7] = 12;
-    else if (diceWithNEyes[4] >= 2) scoreArray[7] = 10;
-    else if (diceWithNEyes[3] >= 2) scoreArray[7] = 8;
-    else if (diceWithNEyes[2] >= 2) scoreArray[7] = 6;
-    else if (diceWithNEyes[1] >= 2) scoreArray[7] = 4;
-    else if (diceWithNEyes[0] >= 2) scoreArray[7] = 2;
-    else scoreArray[7] = 0;
+    if (diceWithNEyes[5] >= 2) scoreArray[onePair] = 12;
+    else if (diceWithNEyes[4] >= 2) scoreArray[onePair] = 10;
+    else if (diceWithNEyes[3] >= 2) scoreArray[onePair] = 8;
+    else if (diceWithNEyes[2] >= 2) scoreArray[onePair] = 6;
+    else if (diceWithNEyes[1] >= 2) scoreArray[onePair] = 4;
+    else if (diceWithNEyes[0] >= 2) scoreArray[onePair] = 2;
+    else scoreArray[onePair] = 0;
 
+    /* Printing the result */
     printf("\nYour rolled dice were: ");
     for (int i = 0; i < dice; i++) {
         printf("%d, ",dicePtr[i]);
     }
-    printf("\nYou got a pair of %d and therefore got %d points.\n", scoreArray[7]/2, scoreArray[7]);
+    printf("\nYou got a pair of %d and therefore got %d points.\n", scoreArray[onePair]/2, scoreArray[onePair]);
 }
 
 /* Function for the two pairs round */
@@ -173,6 +194,7 @@ void playTwoPairs(int dice, int *dicePtr, int *scoreArray) {
     /* Initiating temporary pair integers */
     int i = 6, firstPair = 0, secondPair = 0;
 
+    /* While loop for checking for pairs */
     while (i > 0 && (firstPair == 0 || secondPair == 0)) {
         if (diceWithNEyes[i - 1] >= 2){
             if (firstPair == 0) {
@@ -185,21 +207,23 @@ void playTwoPairs(int dice, int *dicePtr, int *scoreArray) {
         i--;
     }
 
+    /* Awarding the user points two different pairs are present */
     if (firstPair != 0 && secondPair != 0) {
-        scoreArray[8] = (2 * firstPair) + (2 * secondPair);
+        scoreArray[twoPairs] = (2 * firstPair) + (2 * secondPair);
     }
 
     printf("\nYour rolled dice were: ");
     for (int i = 0; i < dice; i++) {
         printf("%d, ",dicePtr[i]);
     }
-    printf("\nYou got a pair of %d and a pair of %d. You therefore got %d points.\n", firstPair, secondPair, scoreArray[8]);
+    printf("\nYou got a pair of %d and a pair of %d. You therefore got %d points.\n", firstPair, secondPair, scoreArray[twoPairs]);
 }
 
 /* Function for the three and four of a kind rounds */
 void playOfAKind(int dice, int *dicePtr, int *scoreArray) {
     int threeWSameEyes = 0, fourWSameEyes = 0;
 
+    /* For loop for playing the two "Of A Kind" rounds */
     for (int i = 3; i < 5; i++) {
         /* Rolling the dice */
         rollMultipleDies(dice, dicePtr);
@@ -211,7 +235,7 @@ void playOfAKind(int dice, int *dicePtr, int *scoreArray) {
         int j = 6, diseFound = 0;
         while (j > 0 && !diseFound) {
             if (diceWithNEyes[j - 1] >= i){
-                (i == 3) ? (scoreArray[9] = 3 * j) : (scoreArray[10] = 4 * j);
+                (i == 3) ? (scoreArray[threeKind] = 3 * j) : (scoreArray[fourKind] = 4 * j);
                 diseFound = 1;
             }
             j--;
@@ -223,8 +247,8 @@ void playOfAKind(int dice, int *dicePtr, int *scoreArray) {
             printf("%d, ",dicePtr[j]);
         }
         printf("\nYou got %s of %d and therefore got %d points.\n", (i == 3) ? "three" : "four"
-                                                                    , (i == 3) ? scoreArray[9] / 3 : scoreArray[10] / 3
-                                                                    , (i == 3) ? scoreArray[9] : scoreArray[10]);
+                                                                  , (i == 3) ? scoreArray[threeKind] / 3 : scoreArray[fourKind] / 3
+                                                                  , (i == 3) ? scoreArray[threeKind] : scoreArray[fourKind]);
     }
 }
 
@@ -249,7 +273,7 @@ void playStraight(int dice, int *dicePtr, int *scoreArray) {
 
         /* Adding points to the score array if none of the dices are missing in the the current range */
         if (dieMissing != 1) {
-            (i == 1) ? (scoreArray[11] = 15) : (scoreArray[12] = 20);
+            (i == 1) ? (scoreArray[smallStraight] = 15) : (scoreArray[largeStraight] = 20);
         } 
         
         /* Printing the result */
@@ -259,7 +283,7 @@ void playStraight(int dice, int *dicePtr, int *scoreArray) {
         }
         printf("\nYou %s %s and therefore got %d points.\n", (dieMissing) ? "didnt get" : "got"
                                                            , (i == 1) ? "small straight" : "large straight"
-                                                           , (i == 1) ? scoreArray[11] : scoreArray[12]);
+                                                           , (i == 1) ? scoreArray[smallStraight] : scoreArray[largeStraight]);
     }
 }
 
@@ -286,14 +310,15 @@ void playFullHouse(int dice, int *dicePtr, int *scoreArray) {
         }
     }
 
+    /* Printing the results and awarding the user points */
     printf("\nYour rolled dice were: ");
     for (int i = 0; i < dice; i++) {
         printf("%d, ",dicePtr[i]);
     }
 
     if (threeOfKind != 0 && twoOfKind != 0) {
-        scoreArray[13] = (3 * threeOfKind) + (2 * twoOfKind);
-        printf("\nYou got two %d and three %d therefore got %d points.\n", twoOfKind, threeOfKind, scoreArray[13]);
+        scoreArray[fullHouse] = (3 * threeOfKind) + (2 * twoOfKind);
+        printf("\nYou got two %d and three %d therefore got %d points.\n", twoOfKind, threeOfKind, scoreArray[fullHouse]);
     }
     else {
         printf("\nYou did not get full house and therefore didnt get any points.\n");
@@ -311,6 +336,7 @@ void playChance(int dice, int *dicePtr, int *scoreArray) {
     int diceNeeded = 5;
     int tempSum = 0;
 
+    /* For loop for finding the sum of the five largest dice */
     for (int i = 6; i > 0; i--) {
         if (diceWithNEyes[i - 1] > diceNeeded) {
             tempSum += diceNeeded * i;
@@ -322,13 +348,14 @@ void playChance(int dice, int *dicePtr, int *scoreArray) {
         }
     }
 
-    scoreArray[14] = tempSum;
+    /* Awarding the user points and printing the result */
+    scoreArray[chance] = tempSum;
 
     printf("\nYour rolled dice were: ");
     for (int i = 0; i < dice; i++) {
         printf("%d, ",dicePtr[i]);
     }
-    printf("\nThe sum of your five largest dice is %d points.\n",  scoreArray[14]);
+    printf("\nThe sum of your five largest dice is %d points.\n",  scoreArray[chance]);
 }
 
 /* Function for the yatzy round */
@@ -341,14 +368,16 @@ void playYatzy(int dice, int *dicePtr, int *scoreArray) {
 
     int i = 6, yatzyNumber = 0;
 
+    /* While loop for checking if the user got yatzy and awarding points*/
     while (i > 0 && yatzyNumber == 0) {
         if (diceWithNEyes[i - 1] >= 5) {
             yatzyNumber = i;
-            scoreArray[15] = 50;
+            scoreArray[yatzy] = 50;
         }
         i--;
     }
 
+    /* Printing the results */
     printf("\nYour rolled dice were: ");
     for (int i = 0; i < dice; i++) {
         printf("%d, ",dicePtr[i]);
@@ -361,6 +390,7 @@ void playYatzy(int dice, int *dicePtr, int *scoreArray) {
     }
 }
 
+/* Function for printing the results */
 void printScore(int *scoreArray){
     /* Calculate the total score */
     int totalScore = 0;
@@ -372,25 +402,26 @@ void printScore(int *scoreArray){
     printf("*-------Yatzy--Results-------*\n");
     printf("*                            *\n");
     printf("*-------Upper--Section-------*\n");
-    printf("-  Ones:             %d\n", scoreArray[0]);
-    printf("-  Twos:             %d\n", scoreArray[1]);
-    printf("-  Threes:           %d\n", scoreArray[2]);
-    printf("-  Fours:            %d\n", scoreArray[3]);
-    printf("-  Fives:            %d\n", scoreArray[4]);
-    printf("-  Sixes:            %d\n", scoreArray[5]);
+    printf("-  Ones:             %d\n", scoreArray[ones]);
+    printf("-  Twos:             %d\n", scoreArray[twos]);
+    printf("-  Threes:           %d\n", scoreArray[threes]);
+    printf("-  Fours:            %d\n", scoreArray[fours]);
+    printf("-  Fives:            %d\n", scoreArray[fives]);
+    printf("-  Sixes:            %d\n", scoreArray[sixes]);
     printf("*--------Upper--Total--------*\n");
-    printf("-  Total:            %d\n", scoreArray[0] + scoreArray[1] + scoreArray[2] + scoreArray[3] + scoreArray[4] + scoreArray[5]);
+    printf("-  Total:            %d\n", scoreArray[ones] + scoreArray[twos] + scoreArray[threes] + 
+                                        scoreArray[fours] + scoreArray[fives] + scoreArray[sixes]);
     printf("*-------Lower--Section-------*\n");
-    printf("-  Bonus:            %d\n", scoreArray[6]);
-    printf("-  One Pair:         %d\n", scoreArray[7]);
-    printf("-  Two pairs:        %d\n", scoreArray[8]);
-    printf("-  Three of a kind:  %d\n", scoreArray[9]);
-    printf("-  Four of a kind:   %d\n", scoreArray[10]);
-    printf("-  Small straight:   %d\n", scoreArray[11]);
-    printf("-  Large straight:   %d\n", scoreArray[12]);
-    printf("-  Full house:       %d\n", scoreArray[13]);
-    printf("-  Chance:           %d\n", scoreArray[14]);
-    printf("-  Yatzy:            %d\n", scoreArray[15]);
+    printf("-  Bonus:            %d\n", scoreArray[bonus]);
+    printf("-  One Pair:         %d\n", scoreArray[onePair]);
+    printf("-  Two pairs:        %d\n", scoreArray[twoPairs]);
+    printf("-  Three of a kind:  %d\n", scoreArray[threeKind]);
+    printf("-  Four of a kind:   %d\n", scoreArray[fourKind]);
+    printf("-  Small straight:   %d\n", scoreArray[smallStraight]);
+    printf("-  Large straight:   %d\n", scoreArray[largeStraight]);
+    printf("-  Full house:       %d\n", scoreArray[fullHouse]);
+    printf("-  Chance:           %d\n", scoreArray[chance]);
+    printf("-  Yatzy:            %d\n", scoreArray[yatzy]);
     printf("*--------Total--Score--------*\n");
     printf("-  Total:            %d\n", totalScore);
 }
