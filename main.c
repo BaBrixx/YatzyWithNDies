@@ -122,7 +122,7 @@ void playUpper(int dice, int *dicePtr, int *scoreArray) {
     int schFor, upperTotal = 0;
 
     /* For loop for playing the upper section for the individual dice */
-    for (schFor = 1; schFor <= 6; schFor++) {
+    for (schFor = 1; schFor <= DIE_MAX_EYES; schFor++) {
         rollMultipleDies(dice, dicePtr);
 
         /* Counting the number of the specific die */
@@ -149,11 +149,11 @@ void playUpper(int dice, int *dicePtr, int *scoreArray) {
     
     /* Checking if the user is eligeble for the bonus */
     if (upperTotal >= 63) {
-        scoreArray[6] = 50;
+        scoreArray[bonus] = 50;
         printf("You got %d and therefore got an extra %d points!\n", upperTotal, scoreArray[bonus]);
     }
     else {
-        scoreArray[6] = 0;
+        scoreArray[bonus] = 0;
         printf("You got %d and therefore got %d extra points!\n", upperTotal, scoreArray[bonus]);
     }
 }
@@ -192,7 +192,7 @@ void playTwoPairs(int dice, int *dicePtr, int *scoreArray) {
     dicePrEye(dice, dicePtr, diceWithNEyes);
 
     /* Initiating temporary pair integers */
-    int i = 6, firstPair = 0, secondPair = 0;
+    int i = DIE_MAX_EYES, firstPair = 0, secondPair = 0;
 
     /* While loop for checking for pairs */
     while (i > 0 && (firstPair == 0 || secondPair == 0)) {
@@ -232,7 +232,7 @@ void playOfAKind(int dice, int *dicePtr, int *scoreArray) {
         dicePrEye(dice, dicePtr, diceWithNEyes);
 
         /* While loop for checking if number of dice with j eyes is larger than i (3 or 4) */
-        int j = 6, diseFound = 0;
+        int j = DIE_MAX_EYES, diseFound = 0;
         while (j > 0 && !diseFound) {
             if (diceWithNEyes[j - 1] >= i){
                 (i == 3) ? (scoreArray[threeKind] = 3 * j) : (scoreArray[fourKind] = 4 * j);
@@ -299,7 +299,7 @@ void playFullHouse(int dice, int *dicePtr, int *scoreArray) {
 
     /* For loop for checking for respectivly 3 dice with x eyes and 2 dice with y eyes */
     for (int i = 2; i > 0; i--) {
-        int j = 6, diceFound = 0;
+        int j = DIE_MAX_EYES, diceFound = 0;
 
         while (j > 0 && diceFound != 1) {
             if (diceWithNEyes[j - 1] >= i + 1 && threeOfKind != j) {
@@ -337,7 +337,7 @@ void playChance(int dice, int *dicePtr, int *scoreArray) {
     int tempSum = 0;
 
     /* For loop for finding the sum of the five largest dice */
-    for (int i = 6; i > 0; i--) {
+    for (int i = DIE_MAX_EYES; i > 0; i--) {
         if (diceWithNEyes[i - 1] > diceNeeded) {
             tempSum += diceNeeded * i;
             diceNeeded -= diceNeeded;
@@ -366,7 +366,7 @@ void playYatzy(int dice, int *dicePtr, int *scoreArray) {
     int diceWithNEyes[] = {0,0,0,0,0,0};
     dicePrEye(dice, dicePtr, diceWithNEyes);
 
-    int i = 6, yatzyNumber = 0;
+    int i = DIE_MAX_EYES, yatzyNumber = 0;
 
     /* While loop for checking if the user got yatzy and awarding points*/
     while (i > 0 && yatzyNumber == 0) {
