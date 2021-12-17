@@ -3,8 +3,12 @@
 //  Yatzy with N dice
 //
 //  Created by Bastian Brix Hansen on 29.10.2021.
+//  Studying: Software
+//  e-mail: bha21@student.aau.dk
+//  Group: B226
 //  Copyright © 2021 Bastian Brix Hansen. All rights reserved.
 */
+
 
 #include <stdio.h>
 #include <stdlib.h>
